@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Interactive timeline of the YES Bank crisis (2020) - A case study in information cascades and behavioral finance">
+    <title>YES Bank Crisis 2020: An Information Cascade Case Study</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 10px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        header p {
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            opacity: 0.95;
+        }
+
+        .crisis-summary {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            padding: 25px 20px;
+            border-bottom: 4px solid #c62828;
+        }
+
+        .crisis-summary h2 {
+            color: #c62828;
+            margin-bottom: 15px;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+        }
+
+        .crisis-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: bold;
+            color: #c62828;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .behavioral-insight {
+            background: #fff3e0;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6f00;
+            border-radius: 5px;
+        }
+
+        .behavioral-insight h3 {
+            color: #e65100;
+            margin-bottom: 10px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+
+        .behavioral-insight p {
+            color: #555;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        .timeline {
+            padding: 40px 15px;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #c62828 0%, #d32f2f 100%);
+            top: 0;
+        }
+
+        .era {
+            margin-bottom: 50px;
+        }
+
+        .era-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .era-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: clamp(1rem, 3.5vw, 1.3rem);
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(198, 40, 40, 0.4);
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 35px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: 45%;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 4px solid #c62828;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            border-left: none;
+            border-right: 4px solid #c62828;
+        }
+
+        .timeline-content:active {
+            transform: scale(0.98);
+        }
+
+        .timeline-marker {
+            width: 10%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 10px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .marker-dot {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border: 4px solid #c62828;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .crisis-marker .marker-dot {
+            width: 24px;
+            height: 24px;
+            background: #c62828;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(198, 40, 40, 0.4);
+            }
+        }
+
+        .date {
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
+            font-weight: bold;
+            color: #c62828;
+            margin-bottom: 8px;
+        }
+
+        .event-title {
+            font-size: clamp(0.95rem, 3vw, 1.15rem);
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .event-type {
+            display: inline-block;
+            font-size: clamp(0.75rem, 2vw, 0.85rem);
+            padding: 4px 12px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .type-warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .type-crisis {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .type-rescue {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .type-aftermath {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .description {
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            color: #666;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .description.expanded {
+            display: block;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .cascade-detail {
+            background: #ffebee;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            border-left: 3px solid #c62828;
+            display: none;
+        }
+
+        .cascade-detail.expanded {
+            display: block;
+        }
+
+        .cascade-detail strong {
+            color: #c62828;
+            font-size: clamp(0.85rem, 2.5vw, 0.9rem);
+        }
+
+        .cascade-detail p {
+            margin-top: 6px;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            color: #666;
+        }
+
+        .impact-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .impact-metrics.expanded {
+            display: grid;
+        }
+
+        .metric {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            color: #c62828;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+
+        .metric-label {
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .expand-indicator {
+            text-align: center;
+            margin-top: 10px;
+            font-size: clamp(0.75rem, 2vw, 0.85rem);
+            color: #c62828;
+            font-weight: 600;
+        }
+
+        .lessons-section {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 30px 20px;
+            margin: 40px 0;
+        }
+
+        .lessons-section h3 {
+            color: #2e7d32;
+            margin-bottom: 20px;
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            text-align: center;
+        }
+
+        .lesson-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #4caf50;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .lesson-card h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+        }
+
+        .lesson-card p {
+            color: #555;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            line-height: 1.6;
+        }
+
+        .cascade-diagram {
+            background: white;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .cascade-diagram h3 {
+            color: #c62828;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+        }
+
+        .cascade-step {
+            background: #f5f5f5;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #c62828;
+            position: relative;
+        }
+
+        .cascade-step::after {
+            content: '↓';
+            display: block;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #c62828;
+            margin-top: 10px;
+        }
+
+        .cascade-step:last-child::after {
+            content: '';
+        }
+
+        .cascade-step strong {
+            color: #c62828;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        .cascade-step p {
+            margin-top: 8px;
+            color: #666;
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+        }
+
+        footer {
+            background: #1e3c72;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            opacity: 0.9;
+        }
+
+        footer a {
+            color: #ffab91;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                border-radius: 10px;
+            }
+
+            header {
+                padding: 20px 15px;
+            }
+
+            .crisis-summary {
+                padding: 20px 15px;
+            }
+
+            .timeline {
+                padding: 30px 10px;
+            }
+
+            .timeline::before {
+                left: 20px;
+                transform: none;
+            }
+
+            .timeline-item,
+            .timeline-item:nth-child(odd) {
+                flex-direction: row;
+                padding-left: 0;
+            }
+
+            .timeline-content {
+                width: calc(100% - 45px);
+                margin-left: 15px;
+            }
+
+            .timeline-item:nth-child(odd) .timeline-content {
+                border-right: none;
+                border-left: 4px solid #c62828;
+                margin-left: 15px;
+            }
+
+            .timeline-marker {
+                width: 30px;
+                flex-shrink: 0;
+            }
+
+            .marker-dot {
+                width: 16px;
+                height: 16px;
+                border-width: 3px;
+            }
+
+            .crisis-marker .marker-dot {
+                width: 20px;
+                height: 20px;
+            }
+
+            .era {
+                margin-bottom: 35px;
+            }
+
+            .timeline-content {
+                padding: 15px;
+            }
+
+            .crisis-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 380px) {
+            .crisis-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>YES Bank Crisis 2020</h1>
+            <p>A Case Study in Information Cascades and Bank Runs</p>
+        </header>
+
+        <div class="crisis-summary">
+            <h2>The Crisis at a Glance</h2>
+            <p>In March 2020, India's fourth-largest private sector bank faced a catastrophic bank run despite government backing. Rational individual decisions created an irrational collective outcome—a perfect demonstration of information cascades in the digital age.</p>
+            
+            <div class="crisis-stats">
+                <div class="stat-box">
+                    <span class="stat-number">13M</span>
+                    <span class="stat-label">Depositors Affected</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">₹50K</span>
+                    <span class="stat-label">Withdrawal Limit</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">48 hrs</span>
+                    <span class="stat-label">Crisis Duration</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">₹10,000 Cr</span>
+                    <span class="stat-label">Rescue Amount</span>
+                </div>
+            </div>
+
+            <div class="behavioral-insight">
+                <h3>🧠 Behavioral Economics Insight</h3>
+                <p><strong>The Paradox:</strong> Every depositor acted rationally (protecting their money by withdrawing when seeing others do so), yet collectively they created the very crisis they feared. This is an information cascade—when observing others' actions causes people to ignore their own private information.</p>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <!-- RISE ERA -->
+            <div class="era">
+                <div class="era-header">
+                    <span class="era-badge">The Rise (2004-2017)</span>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">2004</div>
+                        <div class="event-title">YES Bank Founded</div>
+                        <span class="event-type type-warning">Foundation</span>
+                        <div class="description">
+                            Founded by Rana Kapoor and Ashok Kapur as a "professional" alternative to family-run banks. Strategy: Aggressive growth through corporate lending to infrastructure, real estate, and NBFCs. The bank positioned itself as the modern, tech-savvy player in Indian banking.
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">2005-2015</div>
+                        <div class="event-title">The Golden Years</div>
+                        <span class="event-type type-warning">Rapid Growth</span>
+                        <div class="description">
+                            Assets grew from ₹5,560 crore to ₹2.5 lakh crore—a 45x increase in 10 years. Stock price rose 600%. Rana Kapoor celebrated as banking visionary, winning "Best Bank" awards. Behind the scenes: Heavy exposure to risky sectors, related-party transactions, and aggressive NPA suppression.
+                        </div>
+                        <div class="impact-metrics">
+                            <div class="metric">
+                                <div class="metric-value">45x</div>
+                                <div class="metric-label">Asset Growth</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">600%</div>
+                                <div class="metric-label">Stock Rise</div>
+                            </div>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNRAVELING ERA -->
+            <div class="era">
+                <div class="era-header">
+                    <span class="era-badge">The Unraveling (2018-2019)</span>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">September 2018</div>
+                        <div class="event-title">RBI Asset Quality Review</div>
+                        <span class="event-type type-warning">First Warning</span>
+                        <div class="description">
+                            RBI inspection reveals ₹10,000+ crore in unrecognized NPAs. Rana Kapoor's tenure extension denied—first public red flag. Stock crashes 30% in one week. Market realizes the "Best Bank" awards masked serious asset quality problems. Media speculation begins.
+                        </div>
+                        <div class="cascade-detail">
+                            <strong>⚠️ Cascade Trigger #1</strong>
+                            <p>Institutional investors start dumping shares. Large corporates quietly reduce deposit exposure. No panic yet, but trust eroding.</p>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">March 2019</div>
+                        <div class="event-title">New CEO Reveals Truth</div>
+                        <span class="event-type type-warning">Transparency Shock</span>
+                        <div class="description">
+                            Ravneet Gill (new CEO from Deutsche Bank) conducts honest assessment. Reveals actual stressed assets: ₹40,000+ crore (not ₹7,000 reported). Capital shortfall: ₹15,000 crore. Stock crashes from ₹285 to ₹58. Credit rating downgraded AA → BBB+.
+                        </div>
+                        <div class="impact-metrics">
+                            <div class="metric">
+                                <div class="metric-value">₹40,000 Cr</div>
+                                <div class="metric-label">Real NPAs</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">80%</div>
+                                <div class="metric-label">Stock Drop</div>
+                            </div>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">June-Dec 2019</div>
+                        <div class="event-title">Failed Capital Raising</div>
+                        <span class="event-type type-warning">Mounting Pressure</span>
+                        <div class="description">
+                            Three capital raising attempts collapse: Canadian investor Erwin Singh Braich ($1.2B), Citax Holdings ($500M), SPGP Holdings (₹1,800 crore). Each failure triggers more depositor withdrawals. IL&FS and DHFL (major exposures) default. Deposits decline ₹23,000 crore in Q3 2019.
+                        </div>
+                        <div class="cascade-detail">
+                            <strong>⚠️ Cascade Accelerating</strong>
+                            <p>Corporate treasurers issue internal memos: "Reduce YES Bank exposure." Small businesses start moving deposits. Retail depositors still believe "Too big to fail."</p>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRISIS ERA -->
+            <div class="era">
+                <div class="era-header">
+                    <span class="era-badge">The Crisis (February-March 2020)</span>
+                </div>
+
+                <div class="timeline-item crisis-marker" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">February 1-7, 2020</div>
+                        <div class="event-title">Cascade Week 1: Downgrade</div>
+                        <span class="event-type type-crisis">Crisis Begins</span>
+                        <div class="description">
+                            Moody's downgrades YES Bank to junk status. Stock hits ₹36 (90% down from 2018 peak). Media headlines: "YES Bank Desperately Seeking Capital." Small businesses start withdrawing deposits. Social media discussions begin: "Is my money safe in YES Bank?"
+                        </div>
+                        <div class="cascade-detail">
+                            <strong>🌊 Information Cascade Stage 1</strong>
+                            <p>Private information: "I'm not sure if bank is safe." Observed action: "Rating agencies say junk." Decision: Some withdraw, most wait.</p>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item crisis-marker" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">February 8-14, 2020</div>
+                        <div class="event-title">Cascade Week 2: WhatsApp Panic</div>
+                        <span class="event-type type-crisis">Social Amplification</span>
+                        <div class="description">
+                            Mutual funds holding YES Bank bonds downgrade valuations. Franklin Templeton writes down exposure. WhatsApp forwards: "Should we withdraw from YES?" ATM queues form in Mumbai, Delhi. Local news channels show footage. Social media hashtag #YesBankCrisis trends.
+                        </div>
+                        <div class="cascade-detail">
+                            <strong>🌊 Information Cascade Stage 2</strong>
+                            <p>Observed action: "Others are withdrawing at ATMs." Social proof kicks in. Private information ignored. More people join withdrawal queue.</p>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item crisis-marker" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">February 15-21, 2020</div>
+                        <div class="event-title">Cascade Week 3: Media Storm</div>
+                        <span class="event-type type-crisis">Full Panic Mode</span>
+                        <div class="description">
+                            Bloomberg report: "YES Bank May Need Government Bailout." Deposit outflow accelerates: ₹8,000 crore in one week. TV channels broadcast live from branches showing queues. Rating agencies put bank on "Rating Watch Negative." RBI emergency meetings (not public yet).
+                        </div>
+                        <div class="impact-metrics">
+                            <div class="metric">
+                                <div class="metric-value">₹8,000 Cr</div>
+                                <div class="metric-label">Weekly Outflow</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">24/7</div>
+                                <div class="metric-label">News Coverage</div>
+                            </div>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item crisis-marker" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">February 22-29, 2020</div>
+                        <div class="event-title">Cascade Week 4: Death Spiral</div>
+                        <span class="event-type type-crisis">Point of No Return</span>
+                        <div class="description">
+                            Stock collapses: ₹30 → ₹25 → ₹16 in one week. Branches see long queues daily—TV cameras broadcast images nationwide. Corporate treasurers issue internal memos: "Move all funds out of YES Bank immediately." RBI realizes intervention unavoidable.
+                        </div>
+                        <div class="cascade-detail">
+                            <strong>🌊 Information Cascade Stage 3</strong>
+                            <p>Critical mass reached. Everyone assumes "others know something I don't." Original private information completely discarded. Rational choice: WITHDRAW NOW.</p>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item crisis-marker" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">March 5, 2020 (8:00 PM)</div>
+                        <div class="event-title">RBI Moratorium Announced</div>
+                        <span class="event-type type-crisis">Nuclear Option</span>
+                        <div class="description">
+                            RBI press release: "YES Bank placed under moratorium. Withdrawals restricted to ₹50,000 per account until April 3. Board superseded. Prashant Kumar (ex-SBI) appointed Administrator." Rationale: Prevent total collapse while arranging rescue. Unintended effect: Triggers full panic.
+                        </div>
+                        <div class="cascade-detail">
+                            <strong>💥 The Paradox</strong>
+                            <p>RBI intervention meant to STOP panic actually TRIGGERED it. Depositors interpret restrictions as confirmation of danger. "If government is restricting withdrawals, bank must be failing!"</p>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item crisis-marker" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">March 6, 2020</div>
+                        <div class="event-title">The Bank Run</div>
+                        <span class="event-type type-crisis">Peak Chaos</span>
+                        <div class="description">
+                            Queues form at 6:00 AM (3.5 hours before opening). Mumbai, Delhi, Bengaluru deploy police for crowd control. Media cameras capture panicked depositors. Small business owner pleads: "₹12 lakh trapped, can only withdraw ₹50,000. How will I run my business?" Senior citizen needs ₹2 lakh for medical procedure—told to submit proof and wait. Every withdrawal triggers more panic.
+                        </div>
+                        <div class="cascade-detail">
+                            <strong>🌊 Information Cascade Stage 4: Self-Fulfilling</strong>
+                            <p>TV shows long queues → More people rush to banks → Queues get longer → Even more people panic. Cascade becomes self-fulfilling prophecy. Everyone acts rationally; outcome is irrational.</p>
+                        </div>
+                        <div class="impact-metrics">
+                            <div class="metric">
+                                <div class="metric-value">13M</div>
+                                <div class="metric-label">Depositors</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">₹50K</div>
+                                <div class="metric-label">Max Withdrawal</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">48 hrs</div>
+                                <div class="metric-label">Peak Panic</div>
+                            </div>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESCUE ERA -->
+            <div class="era">
+                <div class="era-header">
+                    <span class="era-badge">The Rescue (March 2020)</span>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">March 13, 2020</div>
+                        <div class="event-title">SBI-Led Reconstruction</div>
+                        <span class="event-type type-rescue">Government Intervention</span>
+                        <div class="description">
+                            SBI consortium announces ₹10,000 crore capital infusion. SBI (₹6,050 crore, 48% stake), ICICI, HDFC, Axis, Kotak, others contribute. AT1 bondholders wiped out (₹8,400 crore loss). Equity shareholders diluted to 2%. Depositors fully protected—no haircut. Why banks agreed: RBI moral suasion + systemic risk concerns.
+                        </div>
+                        <div class="impact-metrics">
+                            <div class="metric">
+                                <div class="metric-value">₹10,000 Cr</div>
+                                <div class="metric-label">Fresh Capital</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">8 Banks</div>
+                                <div class="metric-label">Consortium</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">100%</div>
+                                <div class="metric-label">Deposits Safe</div>
+                            </div>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">March 18, 2020</div>
+                        <div class="event-title">Moratorium Partially Lifted</div>
+                        <span class="event-type type-rescue">First Relief</span>
+                        <div class="description">
+                            Withdrawal limit raised to ₹5 lakh per account. Most retail depositors can access full balances. Business accounts still constrained but improving. Stock rallies 50% in one day (₹5 → ₹7.50). Confidence slowly returning. Queues shorten significantly.
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">April 2020</div>
+                        <div class="event-title">Full Access Restored</div>
+                        <span class="event-type type-rescue">Crisis Ends</span>
+                        <div class="description">
+                            All withdrawal restrictions removed. Normal banking operations resume. Prashant Kumar continues as CEO. Reconstruction plan approved. Bank survived, but smaller and damaged. Total duration of restricted access: ~1 month.
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AFTERMATH ERA -->
+            <div class="era">
+                <div class="era-header">
+                    <span class="era-badge">The Aftermath (2020-2024)</span>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">March-June 2020</div>
+                        <div class="event-title">Criminal Proceedings Begin</div>
+                        <span class="event-type type-aftermath">Legal Consequences</span>
+                        <div class="description">
+                            Rana Kapoor arrested on money laundering charges (₹4,300 crore). ED investigation reveals quid-pro-quo: Loans to DHFL promoter Kapil Wadhawan in exchange for ₹600 crore investments in Kapoor family entities. Properties worth ₹2,500 crore attached. Trials ongoing as of 2024.
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">2020-2021</div>
+                        <div class="event-title">Depositor Behavior Shifts</div>
+                        <span class="event-type type-aftermath">System Impact</span>
+                        <div class="description">
+                            "Flight to safety": PSU bank deposits increased ₹1.5 lakh crore in Q1 2020. Private bank deposit growth slowed. Brand reputation now matters more than interest rates. Corporates diversify banking relationships. "Don't keep all eggs in one basket" becomes treasury policy norm across India Inc.
+                        </div>
+                        <div class="cascade-detail">
+                            <strong>📊 Behavioral Change</strong>
+                            <p>YES Bank crisis permanently altered depositor psychology. Trust in "too big to fail" narrative shattered. Even high-rated private banks face heightened scrutiny.</p>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item" onclick="toggleDetails(this)">
+                    <div class="timeline-marker">
+                        <div class="marker-dot"></div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="date">2024</div>
+                        <div class="event-title">Current Status</div>
+                        <span class="event-type type-aftermath">Long-Term Impact</span>
+                        <div class="description">
+                            YES Bank stabilized but permanently smaller. Deposit base: ₹1.47 lakh crore (down 30% from peak ₹2.1 lakh crore). Stock price: ₹20-25 range (down 95% from 2018 peak of ₹400). Focus shifted to retail banking. Conservative lending. SBI support maintains credibility. Slow recovery, legacy NPAs remain.
+                        </div>
+                        <div class="impact-metrics">
+                            <div class="metric">
+                                <div class="metric-value">-30%</div>
+                                <div class="metric-label">Deposit Base</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">-95%</div>
+                                <div class="metric-label">Stock Price</div>
+                            </div>
+                        </div>
+                        <div class="expand-indicator">👆 Tap to expand</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CASCADE MECHANISM EXPLANATION -->
+        <div class="cascade-diagram">
+            <h3>How the Information Cascade Unfolded</h3>
+            
+            <div class="cascade-step">
+                <strong>Stage 1: Private Uncertainty (February 2020)</strong>
+                <p>Each depositor evaluates bank safety independently. Most lack expertise to assess balance sheet. Private signal: "Probably okay, but I'm not 100% sure." Uncertainty is high.</p>
+            </div>
+
+            <div class="cascade-step">
+                <strong>Stage 2: Observing Others (Late February)</strong>
+                <p>See ATM queues, news reports of deposit outflows. Social proof kicks in: "Others are withdrawing. Why? Do they know something?" Observation becomes more important than private assessment.</p>
+            </div>
+
+            <div class="cascade-step">
+                <strong>Stage 3: Rational Calculation (Early March)</strong>
+                <p><strong>If I withdraw and bank is fine:</strong> I lose some interest (small cost).<br>
+                <strong>If I don't withdraw and bank fails:</strong> I lose everything (huge cost).<br>
+                <strong>Dominant strategy:</strong> WITHDRAW. This is individually rational.</p>
+            </div>
+
+            <div class="cascade-step">
+                <strong>Stage 4: The Cascade (March 5-6)</strong>
+                <p>Each withdrawal reinforces others' decisions. "Everyone is withdrawing—they must know something." Original private information completely ignored. Cascade becomes self-fulfilling. Collectively irrational outcome emerges from individually rational decisions.</p>
+            </div>
+        </div>
+
+        <!-- LESSONS SECTION -->
+        <div class="lessons-section">
+            <h3>Behavioral Economics Lessons</h3>
+
+            <div class="lesson-card">
+                <h4>1. Rational Individuals ≠ Rational Outcomes</h4>
+                <p>Every YES Bank depositor acted rationally given uncertainty and observable actions of others. No one made a "mistake." Yet collectively, they created an unnecessary crisis. This is the paradox of information cascades: individually optimal decisions lead to socially suboptimal outcomes.</p>
+            </div>
+
+            <div class="lesson-card">
+                <h4>2. Observability Accelerates Modern Cascades</h4>
+                <p>In 1991 (Harshad Mehta scam), bank runs took weeks to develop via newspapers and TV. In 2020 (YES Bank), the cascade happened in 48 hours via real-time social media, WhatsApp forwards, and live TV coverage of bank queues. Digital age dramatically accelerates financial panics.</p>
+            </div>
+
+            <div class="lesson-card">
+                <h4>3. Government Backing Is Necessary But Not Sufficient</h4>
+                <p>RBI guaranteed all deposits. Didn't prevent panic. Why? Uncertainty about WHEN depositors would get money back. Liquidity needs are immediate (payroll, bills, EMIs). "Eventually safe" doesn't help with next week's obligations. Behavioral reality trumps economic theory.</p>
+            </div>
+
+            <div class="lesson-card">
+                <h4>4. Intervention Timing Creates Coordination Problems</h4>
+                <p>The moratorium (meant to stabilize the bank) was interpreted as confirmation of danger, triggering the very panic it aimed to prevent. Game theory: Multiple equilibria exist. Bad equilibrium (panic) is stable once started. Moving to good equilibrium requires credible external force.</p>
+            </div>
+
+            <div class="lesson-card">
+                <h4>5. "Too Big To Fail" Creates Moral Hazard</h4>
+                <p>Depositors believed YES Bank (4th largest) would be rescued, enabling risky lending without depositor discipline. Reality: Government DID rescue it, but with pain (restrictions, dilution). Validates TBTF but shows it's not painless. System remains fragile.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Case Study Summary:</strong> The YES Bank crisis demonstrates how information cascades work in modern financial systems. Rational individual behavior can create irrational collective outcomes when people observe and react to each other rather than to fundamentals.</p>
+            <p style="margin-top: 15px;">Created for <strong>Cognitive Biases in Financial Decision-Making Workshop</strong></p>
+            <p style="margin-top: 10px; font-size: 0.85em; opacity: 0.8;">Tap any timeline event to expand full details | Sources: RBI reports, media archives, academic papers</p>
+            <p style="margin-top: 15px;"><a href="../index.html">← Back to Cognitive Biases Timeline</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleDetails(element) {
+            const description = element.querySelector('.description');
+            const cascadeDetail = element.querySelector('.cascade-detail');
+            const impactMetrics = element.querySelector('.impact-metrics');
+            const indicator = element.querySelector('.expand-indicator');
+            
+            const isExpanded = description.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse
+                description.classList.remove('expanded');
+                if (cascadeDetail) cascadeDetail.classList.remove('expanded');
+                if (impactMetrics) impactMetrics.classList.remove('expanded');
+                indicator.textContent = '👆 Tap to expand';
+                indicator.style.color = '#c62828';
+            } else {
+                // Expand
+                description.classList.add('expanded');
+                if (cascadeDetail) cascadeDetail.classList.add('expanded');
+                if (impactMetrics) impactMetrics.classList.add('expanded');
+                indicator.textContent = '👆 Tap to collapse';
+                indicator.style.color = '#ff6b6b';
+            }
+        }
+
+        // Smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Prevent double-tap zoom on iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
